@@ -1,0 +1,28 @@
+model:
+  # Human-readable name surfaced in /v1/models and logs
+  name: "my-vlm"
+
+  # Where weights are expected at runtime (inside container, via volume mount).
+  # The server reads from this path; it does not download weights itself.
+  path: "/models/my-vlm"
+
+  # Optional: populated by scripts/download_model.py before the container starts.
+  source:
+    type: "huggingface"         # huggingface | s3 | local-copy
+    repo_id: "org/model-name"   # HF repo ID, S3 URI, or absolute host path
+    revision: "main"            # git ref, S3 version, or omit for local
+
+  dtype: "auto"                 # auto | float16 | bfloat16
+  quantization: "none"          # none | awq | gptq
+  max_model_len: null           # null = vLLM default
+  max_num_seqs: 256
+
+engine:
+  gpu_memory_utilization: 0.90
+  tensor_parallel_size: 1       # reserved; always 1 in v0.1
+  # Any additional vLLM EngineArgs can be added here and are passed through verbatim.
+  # e.g. enforce_eager: true
+
+server:
+  port: 8000
+  log_level: "info"             # debug | info | warn | error

@@ -66,9 +66,14 @@ config.yaml.example
 - `/metrics` uses `prometheus_client.generate_latest()`. Register counters/histograms at module import time, not inside request handlers.
 - Log effective config (model name, path, all engine args) as a single JSON line at startup.
 
+## Dependencies
+
+- Do **not** pin version numbers when adding packages — install latest and let uv resolve. Example: `uv add fastapi pydantic-settings`, not `uv add fastapi==0.x.y`.
+- vLLM is GPU-only and is **not** installed in the local dev environment. It is imported with a try/except in `engine.py`; the rest of the app runs without it.
+
 ## Docker
 
-- Pin every dependency: vLLM version, CUDA base tag, Python packages in `requirements.txt` with hashes.
+- Pin the CUDA base tag. Python packages in `requirements.txt` are pinned via `uv export`.
 - Run as non-root: `RUN useradd -m appuser && USER appuser`.
 - Model weights are never in the image — volume-mounted read-only at `/models`.
 - Config file volume-mounted read-only at `/etc/inference-server/config.yaml`.

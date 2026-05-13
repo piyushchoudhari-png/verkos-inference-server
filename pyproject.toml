@@ -1,0 +1,16 @@
+[project]
+name = "verkos-inference-server"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi[standard]>=0.136.1",
+    "pillow>=11.0.0",
+    "huggingface-hub>=1.14.0",
+    "pydantic-settings>=2.14.1",
+    "pynvml>=13.0.1",
+    "python-json-logger>=4.1.0",
+    "pyyaml>=6.0.3",
+    "vllm>=0.20.2",
+]
