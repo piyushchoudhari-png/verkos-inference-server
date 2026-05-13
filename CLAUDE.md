@@ -8,29 +8,9 @@ FastAPI wrapper around vLLM, serving a single vision-language model behind an Op
 - Base image: `nvidia/cuda:12.4.1-runtime-ubuntu24.04`
 - Linux x86_64 + NVIDIA GPU only
 
-## Project layout
-
-```
-app/
-  main.py          # FastAPI app, lifespan, route registration
-  config.py        # Pydantic settings — YAML + env var merge
-  engine.py        # vLLM engine wrapper (single instance)
-  routes/
-    chat.py        # POST /v1/chat/completions
-    models.py      # GET /v1/models
-    health.py      # GET /health
-    metrics.py     # GET /metrics
-    admin.py       # GET /admin/config
-    reserved.py    # 501 stubs: load, unload, warmup
-scripts/
-  download_model.py
-Dockerfile
-config.yaml.example
-```
-
 ## Python
 
-- Type-annotate everything. Use `from __future__ import annotations` at the top of every file.
+- Type-annotate everything. 
 - Prefer `pydantic.BaseModel` for all data shapes — request bodies, response bodies, config.
 - No global mutable state outside of `engine.py`'s single engine instance.
 - Raise `HTTPException` at the route layer; engine layer raises domain exceptions.

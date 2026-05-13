@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 import time
 from collections import defaultdict
 
@@ -69,7 +67,11 @@ def _gpu_info() -> list[GpuInfo]:
         for i in range(pynvml.nvmlDeviceGetCount()):
             handle = pynvml.nvmlDeviceGetHandleByIndex(i)
             mem = pynvml.nvmlDeviceGetMemoryInfo(handle)
-            gpus.append(GpuInfo(index=i, memory_used_bytes=mem.used, memory_total_bytes=mem.total))
+            gpus.append(
+                GpuInfo(
+                    index=i, memory_used_bytes=mem.used, memory_total_bytes=mem.total
+                )
+            )
         return gpus
     except Exception:
         return []

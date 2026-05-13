@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 import logging
 import sys
 from contextlib import asynccontextmanager
@@ -16,7 +14,9 @@ from app.routes.metrics import set_model
 
 def _configure_logging(log_level: str) -> None:
     handler = logging.StreamHandler(sys.stdout)
-    handler.setFormatter(JsonFormatter(fmt="%(asctime)s %(levelname)s %(name)s %(message)s"))
+    handler.setFormatter(
+        JsonFormatter(fmt="%(asctime)s %(levelname)s %(name)s %(message)s")
+    )
     root = logging.getLogger()
     root.handlers = [handler]
     root.setLevel(log_level.upper())
@@ -34,7 +34,11 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     for env_var, vals in conflicts.items():
         logger.warning(
             "Config override detected",
-            extra={"env_var": env_var, "file_value": vals["file"], "env_value": vals["env"]},
+            extra={
+                "env_var": env_var,
+                "file_value": vals["file"],
+                "env_value": vals["env"],
+            },
         )
 
     logger.info(

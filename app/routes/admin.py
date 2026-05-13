@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 from fastapi import APIRouter, Request
 
 from app.schemas.admin import AdminConfigResponse

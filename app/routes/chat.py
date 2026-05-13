@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 import base64
 import json
 import logging
@@ -34,7 +32,9 @@ def _extract_images(messages: list[Message]) -> list[Any]:
 
         from PIL import Image
     except ImportError:
-        raise HTTPException(status_code=500, detail="Pillow not installed; required for image inputs")
+        raise HTTPException(
+            status_code=500, detail="Pillow not installed; required for image inputs"
+        )
 
     images = []
     for msg in messages:
@@ -54,15 +54,20 @@ def _extract_images(messages: list[Message]) -> list[Any]:
     return images
 
 
-def _build_text_prompt(messages: list[Message]) -> str:
-    parts = []
+def _build_hf_messages(messages: list[Message]) -> list[dict[str, Any]]:
+    result = []
     for msg in messages:
         if isinstance(msg.content, str):
-            parts.append(f"{msg.role}: {msg.content}")
+            result.append({"role": msg.role, "content": msg.content})
         else:
-            text_parts = [p.text for p in msg.content if p.type == "text" and p.text]
-            parts.append(f"{msg.role}: {' '.join(text_parts)}")
-    return "\n".join(parts)
+            content: list[dict[str, Any]] = []
+            for part in msg.content:
+                if part.type == "image_url" and part.image_url:
+                    content.append({"type": "image"})
+                elif part.type == "text" and part.text:
+                    content.append({"type": "text", "text": part.text})
+            result.append({"role": msg.role, "content": content})
+    return result
 
 
 async def _generate(
@@ -87,15 +92,20 @@ async def _generate(
     images = _extract_images(request.messages)
     image_count = len(images)
 
+    tokenizer = engine.get_tokenizer()
+    prompt_text: str = tokenizer.apply_chat_template(
+        _build_hf_messages(request.messages),
+        tokenize=False,
+        add_generation_prompt=True,
+    )
+
     if images:
-        # vLLM multimodal: pass images via multi_modal_data alongside the text prompt.
-        # The model's chat template is not applied here; we pass raw conversation text.
-        inputs: dict[str, Any] = {
-            "prompt": _build_text_prompt(request.messages),
+        inputs: Any = {
+            "prompt": prompt_text,
             "multi_modal_data": {"image": images[0] if len(images) == 1 else images},
         }
     else:
-        inputs = _build_text_prompt(request.messages)
+        inputs = prompt_text
 
     async for output in engine.generate(inputs, sampling_params, request_id):
         yield output, image_count
@@ -179,7 +189,9 @@ async def _complete(
             extra={
                 "latency_ms": round(latency * 1000, 1),
                 "prompt_tokens": usage.prompt_tokens if usage is not None else None,
-                "completion_tokens": usage.completion_tokens if usage is not None else None,
+                "completion_tokens": usage.completion_tokens
+                if usage is not None
+                else None,
                 "image_count": image_count,
                 "model": model_name,
                 "status": status,
@@ -208,7 +220,7 @@ async def _stream(
         prev_texts: dict[int, str] = {}
         async for output, image_count in _generate(engine, body, model_name):
             for c in output.outputs:
-                delta_text = c.text[len(prev_texts.get(c.index, "")):]
+                delta_text = c.text[len(prev_texts.get(c.index, "")) :]
                 prev_texts[c.index] = c.text
                 chunk = ChatCompletionChunk(
                     id=chunk_id,
