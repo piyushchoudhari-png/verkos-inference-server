@@ -10,6 +10,7 @@ The script is idempotent: it skips download if the manifest exists and checksums
 import argparse
 import hashlib
 import json
+import shutil
 import sys
 from pathlib import Path
 
@@ -89,8 +90,6 @@ def _download_s3(uri: str, dest: Path) -> list[Path]:
 
 
 def _copy_local(src: Path, dest: Path) -> list[Path]:
-    import shutil
-
     shutil.copytree(src, dest, dirs_exist_ok=True)
     return list(dest.rglob("*"))
 

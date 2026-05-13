@@ -1,12 +1,15 @@
 import base64
+import io
 import json
 import logging
 import time
 import uuid
-from typing import Any, AsyncIterator
+from collections.abc import AsyncIterator
+from typing import Any
 
 from fastapi import APIRouter, HTTPException, Request
 from fastapi.responses import StreamingResponse
+from PIL import Image as PILImage
 
 from app.routes.metrics import dec_in_flight, inc_in_flight, record_request
 from app.schemas.chat import (
@@ -27,14 +30,6 @@ router = APIRouter()
 
 
 def _extract_images(messages: list[Message]) -> list[Any]:
-    try:
-        import io
-
-        from PIL import Image
-    except ImportError:
-        raise HTTPException(
-            status_code=500, detail="Pillow not installed; required for image inputs"
-        )
 
     images = []
     for msg in messages:
@@ -50,7 +45,7 @@ def _extract_images(messages: list[Message]) -> list[Any]:
                     )
                 _, encoded = uri.split(",", 1)
                 raw = base64.b64decode(encoded)
-                images.append(Image.open(io.BytesIO(raw)))
+                images.append(PILImage.open(io.BytesIO(raw)))
     return images
 
 
@@ -70,15 +65,25 @@ def _build_hf_messages(messages: list[Message]) -> list[dict[str, Any]]:
     return result
 
 
+def _count_images(messages: list[Message]) -> int:
+    return sum(
+        1
+        for msg in messages
+        if isinstance(msg.content, list)
+        for part in msg.content
+        if part.type == "image_url" and part.image_url is not None
+    )
+
+
 async def _generate(
     engine: Any,
     request: ChatCompletionRequest,
     model_name: str,
-) -> AsyncIterator[tuple[Any, int]]:
+) -> AsyncIterator[Any]:
     try:
         from vllm.sampling_params import SamplingParams
     except ImportError:
-        raise HTTPException(status_code=503, detail="vLLM not available")
+        raise HTTPException(status_code=503, detail="vLLM not available") from None
 
     request_id = str(uuid.uuid4())
     sampling_params = SamplingParams(
@@ -90,8 +95,6 @@ async def _generate(
     )
 
     images = _extract_images(request.messages)
-    image_count = len(images)
-
     tokenizer = engine.get_tokenizer()
     prompt_text: str = tokenizer.apply_chat_template(
         _build_hf_messages(request.messages),
@@ -108,7 +111,7 @@ async def _generate(
         inputs = prompt_text
 
     async for output in engine.generate(inputs, sampling_params, request_id):
-        yield output, image_count
+        yield output
 
 
 @router.post("/v1/chat/completions", response_model=None)
@@ -142,11 +145,11 @@ async def _complete(
     inc_in_flight()
     status = "success"
     usage: Usage | None = None
+    image_count = _count_images(body.messages)
 
     try:
         final_output = None
-        image_count = 0
-        async for output, image_count in _generate(engine, body, model_name):
+        async for output in _generate(engine, body, model_name):
             final_output = output
 
         if final_output is None:
@@ -163,8 +166,7 @@ async def _complete(
         usage = Usage(
             prompt_tokens=len(final_output.prompt_token_ids),
             completion_tokens=sum(len(c.token_ids) for c in final_output.outputs),
-            total_tokens=len(final_output.prompt_token_ids)
-            + sum(len(c.token_ids) for c in final_output.outputs),
+            total_tokens=len(final_output.prompt_token_ids) + sum(len(c.token_ids) for c in final_output.outputs),
         )
         response = ChatCompletionResponse(
             id=f"chatcmpl-{uuid.uuid4().hex}",
@@ -189,9 +191,7 @@ async def _complete(
             extra={
                 "latency_ms": round(latency * 1000, 1),
                 "prompt_tokens": usage.prompt_tokens if usage is not None else None,
-                "completion_tokens": usage.completion_tokens
-                if usage is not None
-                else None,
+                "completion_tokens": usage.completion_tokens if usage is not None else None,
                 "image_count": image_count,
                 "model": model_name,
                 "status": status,
@@ -210,7 +210,8 @@ async def _stream(
     t0 = time.monotonic()
     inc_in_flight()
     status = "success"
-    image_count = 0
+    image_count = _count_images(body.messages)
+    prompt_tokens = 0
     completion_tokens = 0
 
     chunk_id = f"chatcmpl-{uuid.uuid4().hex}"
@@ -218,7 +219,8 @@ async def _stream(
 
     try:
         prev_texts: dict[int, str] = {}
-        async for output, image_count in _generate(engine, body, model_name):
+        async for output in _generate(engine, body, model_name):
+            prompt_tokens = len(output.prompt_token_ids)
             for c in output.outputs:
                 delta_text = c.text[len(prev_texts.get(c.index, "")) :]
                 prev_texts[c.index] = c.text
@@ -250,6 +252,7 @@ async def _stream(
             "chat_completion_stream",
             extra={
                 "latency_ms": round(latency * 1000, 1),
+                "prompt_tokens": prompt_tokens,
                 "completion_tokens": completion_tokens,
                 "image_count": image_count,
                 "model": model_name,

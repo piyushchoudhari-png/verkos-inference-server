@@ -1,7 +1,7 @@
 import logging
 import sys
+from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
-from typing import AsyncIterator
 
 from fastapi import FastAPI
 from pythonjsonlogger.jsonlogger import JsonFormatter
@@ -14,9 +14,7 @@ from app.routes.metrics import set_model
 
 def _configure_logging(log_level: str) -> None:
     handler = logging.StreamHandler(sys.stdout)
-    handler.setFormatter(
-        JsonFormatter(fmt="%(asctime)s %(levelname)s %(name)s %(message)s")
-    )
+    handler.setFormatter(JsonFormatter(fmt="%(asctime)s %(levelname)s %(name)s %(message)s"))
     root = logging.getLogger()
     root.handlers = [handler]
     root.setLevel(log_level.upper())

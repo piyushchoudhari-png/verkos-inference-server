@@ -1,7 +1,7 @@
-from __future__ import annotations
+from typing import Any
 
 from pydantic import BaseModel
 
 
 class AdminConfigResponse(BaseModel):
-    config: dict
+    config: dict[str, Any]

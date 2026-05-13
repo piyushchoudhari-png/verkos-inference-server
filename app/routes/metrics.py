@@ -1,16 +1,10 @@
 import time
 from collections import defaultdict
 
+import pynvml
 from fastapi import APIRouter
 
 from app.schemas.metrics import GpuInfo, MetricsResponse
-
-try:
-    import pynvml
-
-    _NVML_AVAILABLE = True
-except ImportError:
-    _NVML_AVAILABLE = False
 
 router = APIRouter()
 
@@ -49,8 +43,7 @@ def _ensure_nvml() -> bool:
     global _nvml_initialized
     if _nvml_initialized:
         return True
-    if not _NVML_AVAILABLE:
-        return False
+
     try:
         pynvml.nvmlInit()
         _nvml_initialized = True
@@ -67,11 +60,7 @@ def _gpu_info() -> list[GpuInfo]:
         for i in range(pynvml.nvmlDeviceGetCount()):
             handle = pynvml.nvmlDeviceGetHandleByIndex(i)
             mem = pynvml.nvmlDeviceGetMemoryInfo(handle)
-            gpus.append(
-                GpuInfo(
-                    index=i, memory_used_bytes=mem.used, memory_total_bytes=mem.total
-                )
-            )
+            gpus.append(GpuInfo(index=i, memory_used_bytes=mem.used, memory_total_bytes=mem.total))
         return gpus
     except Exception:
         return []

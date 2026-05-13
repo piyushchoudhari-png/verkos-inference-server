@@ -4,7 +4,7 @@ FastAPI wrapper around vLLM, serving a single vision-language model behind an Op
 
 ## Stack
 
-- Python 3.11+, FastAPI + uvicorn, vLLM (pinned), prometheus-client
+- Python 3.11+, FastAPI + uvicorn, vLLM (pinned)
 - Base image: `nvidia/cuda:12.4.1-runtime-ubuntu24.04`
 - Linux x86_64 + NVIDIA GPU only
 
@@ -43,7 +43,7 @@ FastAPI wrapper around vLLM, serving a single vision-language model behind an Op
 
 - Structured JSON to stdout on every request: `timestamp`, `latency_ms`, `prompt_tokens`, `completion_tokens`, `image_count`, `model`, `status`.
 - Use `python-json-logger` or equivalent — no ad-hoc `json.dumps` in route handlers.
-- `/metrics` uses `prometheus_client.generate_latest()`. Register counters/histograms at module import time, not inside request handlers.
+- `/metrics` returns a JSON response with uptime, request counts, in-flight count, avg latency, and GPU memory info. Update module-level counters from helper functions, not inside request handlers.
 - Log effective config (model name, path, all engine args) as a single JSON line at startup.
 
 ## Dependencies
