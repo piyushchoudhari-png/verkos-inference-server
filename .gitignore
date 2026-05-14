@@ -208,6 +208,9 @@ tempCodeRunnerFile.py
 # Model weights
 models/
 
+# Simulator results
+sim_results/
+
 # Ruff stuff:
 .ruff_cache/
 

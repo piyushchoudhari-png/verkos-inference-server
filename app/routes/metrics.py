@@ -1,7 +1,10 @@
 import time
+import warnings
 from collections import defaultdict
 
-import pynvml
+with warnings.catch_warnings():
+    warnings.simplefilter("ignore", FutureWarning)
+    import pynvml
 from fastapi import APIRouter
 
 from app.schemas.metrics import GpuInfo, MetricsResponse

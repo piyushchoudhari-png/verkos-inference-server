@@ -7,6 +7,7 @@ FastAPI wrapper around vLLM, serving a single vision-language model behind an Op
 - Python 3.11+, FastAPI + uvicorn, vLLM (pinned)
 - Base image: `nvidia/cuda:12.4.1-runtime-ubuntu24.04`
 - Linux x86_64 + NVIDIA GPU only
+- Package manager: **uv** — use `uv add`, `uv run`, `uv sync`, `uv export` exclusively. Do not use pip, pip-tools, poetry, or conda.
 
 ## Python
 
@@ -48,7 +49,10 @@ FastAPI wrapper around vLLM, serving a single vision-language model behind an Op
 
 ## Dependencies
 
+- **uv is the only package manager.** Never use pip, pip-tools, poetry, or conda.
+- Add packages with `uv add <pkg>`, run scripts with `uv run <cmd>`, sync the venv with `uv sync`.
 - Do **not** pin version numbers when adding packages — install latest and let uv resolve. Example: `uv add fastapi pydantic-settings`, not `uv add fastapi==0.x.y`.
+- Freeze for Docker with `uv export --no-dev -o requirements.txt`.
 - vLLM is GPU-only and is **not** installed in the local dev environment. It is imported with a try/except in `engine.py`; the rest of the app runs without it.
 
 ## Docker

@@ -1,0 +1,20 @@
+# Parameter sweep config for the VLM profiling simulator.
+# Run: uv run python -m simulator.sweep --config simulator/config/sweep.yaml
+
+# Path to the base sim config. Axis values override fields on this config per run.
+base_config: "simulator/config/sim_config.yaml"
+
+# Output root; sweep results land under {output_dir}/{sweep_id}/
+output_dir: "./sweep_results"
+
+# Optional fixed sweep_id (auto-generated 12-char hex if absent)
+# sweep_id: "baseline_qwen_resolution_x_feeds"
+
+# Cross-product of these axes.
+#
+# Tip: order axes so the slowest-changing one is first. Itertools.product iterates
+# the first axis slowest, so putting `model_path` first avoids unnecessary engine
+# reloads.
+axes:
+  num_feeds: [1, 2, 4]
+  downscale_factor: [null, 0.5]
