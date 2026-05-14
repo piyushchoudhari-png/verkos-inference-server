@@ -35,6 +35,35 @@ def _strip_fences(text: str) -> str:
     return text.strip()
 
 
+def _detect_scale(boxes: list[tuple[int, int, int, int]], img_w: int, img_h: int) -> tuple[float, float]:
+    """Return (sx, sy) to convert bbox coords to pixel space.
+
+    Qwen VL (and similar) outputs coords in [0, 1000] regardless of image size.
+    If any coord exceeds the image dimensions it can't be pixels — scale from 1000.
+    If all coords are ≤ 1.0 treat as normalized [0, 1].
+    """
+    if not boxes:
+        return 1.0, 1.0
+    max_val = max(v for box in boxes for v in box)
+    if max_val <= 1.0:
+        return float(img_w), float(img_h)
+    if max_val > max(img_w, img_h):
+        return img_w / 1000.0, img_h / 1000.0
+    return 1.0, 1.0
+
+
+def _scale_box(
+    box: tuple[int, int, int, int], sx: float, sy: float, img_w: int, img_h: int
+) -> tuple[int, int, int, int]:
+    x1, y1, x2, y2 = box
+    return (
+        max(0, min(img_w, int(x1 * sx))),
+        max(0, min(img_h, int(y1 * sy))),
+        max(0, min(img_w, int(x2 * sx))),
+        max(0, min(img_h, int(y2 * sy))),
+    )
+
+
 def _extract_boxes(raw: Any) -> list[tuple[int, int, int, int]]:
     if not isinstance(raw, list) or not raw:
         return []
@@ -124,10 +153,14 @@ def annotate_frame(image: Image.Image, output_text: str) -> Image.Image:
     except TypeError:
         font = ImageFont.load_default()
 
+    all_boxes = [box for _, boxes in drawable for box in boxes]
+    sx, sy = _detect_scale(all_boxes, img.width, img.height)
+
     for event, boxes in drawable:
         rgb = _color_for(event)
 
-        for x1, y1, x2, y2 in boxes:
+        for raw_box in boxes:
+            x1, y1, x2, y2 = _scale_box(raw_box, sx, sy, img.width, img.height)
             draw.rectangle([x1, y1, x2, y2], fill=rgb + (51,), outline=rgb + (220,), width=line_w)
 
             bbox_dims = font.getbbox(event)

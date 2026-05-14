@@ -2,6 +2,7 @@ import argparse
 import asyncio
 import logging
 import uuid
+from datetime import datetime
 
 from src.config import SimConfig, load_prompt_config, load_sim_config
 
@@ -58,7 +59,7 @@ def main() -> None:
     if args.output_dir:
         config = config.model_copy(update={"output_dir": args.output_dir})
 
-    run_id = config.run_id or uuid.uuid4().hex[:12]
+    run_id = config.run_id or f"{uuid.uuid4().hex[:8]}-{datetime.now().strftime('%Y%m%d%H%M%S')}"
 
     asyncio.run(run(config, run_id))
 

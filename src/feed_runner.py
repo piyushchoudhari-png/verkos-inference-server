@@ -1,6 +1,7 @@
 import asyncio
 import time
 import uuid
+from datetime import datetime
 from pathlib import Path
 from typing import Any
 
@@ -66,7 +67,7 @@ async def _infer_frame_local(
         n=1,
     )
     inputs = _build_inputs(tokenizer, prompt, frame_index, image, model_name)
-    request_id = str(uuid.uuid4())
+    request_id = f"{uuid.uuid4().hex[:8]}-{datetime.now().strftime('%Y%m%d%H%M%S%f')}"
 
     resolution_w: int = getattr(image, "width", 0)
     resolution_h: int = getattr(image, "height", 0)
@@ -186,12 +187,8 @@ async def run_feed(
     )
 
     inference_tasks: list[asyncio.Task[None]] = []
-    start_mono = time.monotonic()
 
     async for frame_index, image in source.frames():
-        if config.run_duration_s is not None and (time.monotonic() - start_mono) >= config.run_duration_s:
-            break
-
         frame_path = frames_dir / f"feed{feed_id:02d}_frame{frame_index:04d}.jpg"
         image.save(frame_path, format="JPEG", quality=90)
 

@@ -209,7 +209,7 @@ tempCodeRunnerFile.py
 models/
 
 # Simulator results
-sim_results/
+results/
 
 # Ruff stuff:
 .ruff_cache/

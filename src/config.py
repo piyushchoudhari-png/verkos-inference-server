@@ -25,7 +25,6 @@ class SimConfig(BaseModel):
     prompts_file: str
     num_feeds: int = 4
     frame_interval_s: float = 10.0
-    run_duration_s: float | None = None
     max_frames_per_feed: int | None = None
     resolution: tuple[int, int] | None = None
     downscale_factor: float | None = None
@@ -39,12 +38,6 @@ class SimConfig(BaseModel):
     run_id: str | None = None
     inference_mode: Literal["local", "openrouter"] = "local"
     openrouter: OpenRouterConfig | None = None
-
-    @model_validator(mode="after")
-    def check_termination_condition(self) -> "SimConfig":
-        if self.run_duration_s is None and self.max_frames_per_feed is None:
-            raise ValueError("Set at least one of run_duration_s or max_frames_per_feed to bound the run")
-        return self
 
     @model_validator(mode="after")
     def check_resolution_conflict(self) -> "SimConfig":
