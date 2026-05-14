@@ -211,6 +211,12 @@ models/
 # Simulator results
 results/
 
+# Large media files
+*.mp4
+*.avi
+*.mov
+*.mkv
+
 # Ruff stuff:
 .ruff_cache/
 
