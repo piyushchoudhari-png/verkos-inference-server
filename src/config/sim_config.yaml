@@ -22,7 +22,7 @@ prompts_file: "/home/capybara/code/flytbase/verkos-inference-server/src/config/p
 
 num_feeds: 1
 frame_interval_s: 2.0
-# max_frames_per_feed: 20
+max_frames_per_feed: 20
 
 downscale_factor: null
 # resolution: [640, 360]
