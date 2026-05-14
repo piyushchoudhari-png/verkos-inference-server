@@ -1,0 +1,44 @@
+Sim Run: d5e47d48dd78
+
+Config
+  inference_mode: openrouter
+  model: qwen/qwen3-vl-32b-instruct
+  num_feeds: 1
+  frame_interval_s: 10.0
+  run_duration_s: 120.0
+  max_frames_per_feed: None
+  max_tokens: 812
+  temperature: 0.7
+  resolution: native
+  downscale_factor: none
+
+VRAM
+  (not measured in openrouter mode)
+
+Latency
+  P50: 15666 ms
+  P95: 17909 ms
+  P99: 17986 ms
+  mean: 15029 ms
+
+Token rates (tok/s)
+  prefill P50 / P95: 551.8 / 1119.7
+  decode  P50 / P95: 39.5 / 44.7
+
+Throughput
+  frames: 10 ok / 12 total
+  throughput: 0.0732 fps
+  stability (CoV, 10s windows): 0.0
+  run duration: 136.7 s
+  errors: 2 (16.7%)
+  error classes:
+    other: 2
+
+GPU Utilization
+  min: 0%
+  mean: 0.3%
+  max: 15%
+
+Per-Feed Breakdown
+  feed  frames  P50 (ms)  P95 (ms)
+     0      10   15665.5   17909.0

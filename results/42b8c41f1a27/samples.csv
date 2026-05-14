@@ -1,0 +1,239 @@
+run_id,feed_id,frame_index,t0_epoch,latency_s,ttft_s,prompt_tokens,completion_tokens,resolution_w,resolution_h,model,inference_mode,status,error_msg,output_text
+42b8c41f1a27,0,0,1778739813.1921067,11.945235903999674,3.4875819379994937,3362,255,3840,2160,qwen/qwen3-vl-32b-instruct,openrouter,ok,,"```json
+{
+  ""detections"": [
+    {
+      ""event"": ""vehicle"",
+      ""bbox"": [309, 0, 334, 81],
+      ""confidence"": 0.98
+    },
+    {
+      ""event"": ""vehicle"",
+      ""bbox"": [374, 6, 401, 121],
+      ""confidence"": 0.97
+    },
+    {
+      ""event"": ""vehicle"",
+      ""bbox"": [380, 299, 407, 397],
+      ""confidence"": 0.96
+    },
+    {
+      ""event"": ""vehicle"",
+      ""bbox"": [577, 134, 601, 221],
+      ""confidence"": 0.95
+    },
+    {
+      ""event"": ""vehicle"",
+      ""bbox"": [580, 625, 608, 723],
+      ""confidence"": 0.94
+    }
+  ],
+  ""notes"": ""No persons, fire, smoke, or intrusions detected in this frame.""
+}
+```"
+42b8c41f1a27,0,1,1778739823.5369766,7.541630544000327,2.7063392660002137,3362,163,3840,2160,qwen/qwen3-vl-32b-instruct,openrouter,ok,,"{
+  ""events"": [
+    {
+      ""type"": ""person"",
+      ""count"": 1,
+      ""bbox"": [
+        350,
+        439,
+        365,
+        460
+      ]
+    },
+    {
+      ""type"": ""vehicle"",
+      ""count"": 2,
+      ""bbox"": [
+        [23, 725, 60, 810],
+        [690, 389, 718, 477]
+      ]
+    },
+    {
+      ""type"": ""fire or smoke"",
+      ""count"": 0
+    },
+    {
+      ""type"": ""intrusion"",
+      ""count"": 0
+    }
+  ]
+}"
+42b8c41f1a27,0,2,1778739834.0821345,5.789535871000226,3.066264437999962,3362,85,3840,2160,qwen/qwen3-vl-32b-instruct,openrouter,ok,,"```json
+{
+  ""detections"": [
+    {
+      ""event"": ""vehicle"",
+      ""bbox"": [377, 200, 408, 307],
+      ""confidence"": 0.98
+    }
+  ],
+  ""undetected_events"": [
+    ""person"",
+    ""fire or smoke"",
+    ""intrusion""
+  ]
+}
+```"
+42b8c41f1a27,0,3,1778739844.8456416,8.397893147000104,3.3981115720007438,3362,171,3840,2160,qwen/qwen3-vl-32b-instruct,openrouter,ok,,"```json
+{
+  ""detections"": [
+    {
+      ""event"": ""vehicle"",
+      ""count"": 5,
+      ""bounding_boxes"": [
+        [398, 542, 427, 627],
+        [552, 663, 584, 766],
+        [655, 856, 685, 944],
+        [655, 180, 687, 292],
+        [470, 977, 498, 999]
+      ]
+    }
+  ],
+  ""undetected_events"": [
+    ""person"",
+    ""fire or smoke"",
+    ""intrusion""
+  ]
+}
+```"
+42b8c41f1a27,0,4,1778739855.7331345,5.798015780999776,2.896398870999292,3362,112,3840,2160,qwen/qwen3-vl-32b-instruct,openrouter,ok,,"```json
+{
+  ""detections"": [
+    {
+      ""event"": ""vehicle"",
+      ""count"": 1,
+      ""bbox"": [44, 78, 96, 149],
+      ""normalized_bbox"": [0.044, 0.078, 0.096, 0.149]
+    }
+  ],
+  ""undetected_events"": [
+    ""person"",
+    ""fire or smoke"",
+    ""intrusion""
+  ]
+}
+```"
+42b8c41f1a27,0,5,1778739866.7080438,6.23114977700061,3.586475346000043,3362,31,3840,2160,qwen/qwen3-vl-32b-instruct,openrouter,ok,,"```json
+{
+  ""person"": [],
+  ""vehicle"": [],
+  ""fire_or_smoke"": [],
+  ""intrusion"": []
+}
+```"
+42b8c41f1a27,0,6,1778739878.0212042,11.960019963999912,4.629175715999736,3362,197,3840,2160,qwen/qwen3-vl-32b-instruct,openrouter,ok,,"```json
+{
+  ""detections"": [
+    {
+      ""event"": ""vehicle"",
+      ""count"": 4,
+      ""bounding_boxes"": [
+        [0, 609, 37, 697],
+        [471, 720, 497, 812],
+        [661, 775, 689, 861],
+        [663, 141, 691, 238]
+      ]
+    },
+    {
+      ""event"": ""person"",
+      ""count"": 0,
+      ""bounding_boxes"": []
+    },
+    {
+      ""event"": ""fire or smoke"",
+      ""count"": 0,
+      ""bounding_boxes"": []
+    },
+    {
+      ""event"": ""intrusion"",
+      ""count"": 0,
+      ""bounding_boxes"": []
+    }
+  ]
+}
+```"
+42b8c41f1a27,0,7,1778739888.3786101,7.464459736999743,2.67131128300025,3362,127,3840,2160,qwen/qwen3-vl-32b-instruct,openrouter,ok,,"```json
+{
+  ""detections"": [
+    {
+      ""event"": ""vehicle"",
+      ""count"": 2,
+      ""bounding_boxes"": [
+        [172, 0, 198, 58],
+        [754, 16, 778, 104]
+      ]
+    }
+  ],
+  ""notes"": ""No persons, fire, smoke, or intrusions detected in the frame. Two vehicles are visible: one white vehicle in the parking lot (top left) and one white vehicle on the road (top right).""
+}
+```"
+42b8c41f1a27,0,8,1778739898.8964417,4.671813705999739,,0,0,3840,2160,qwen/qwen3-vl-32b-instruct,openrouter,error,"Error code: 400 - {'error': {'message': 'Provider returned error', 'code': 400, 'metadata': {'raw': '{""error"":{""message"":""<400> InternalError.Algo.InvalidParameter: Multimodal file size is too large"",""type"":""invalid_request_error"",""param"":null,""code"":""invalid_parameter_error""},""id"":""chatcmpl-bdd7910f-1535-99ab-8e15-f55bd65354ec"",""request_id"":""bdd7910f-1535-99ab-8e15-f55bd65354ec""}', 'provider_name': 'Alibaba', 'is_byok': False}}, 'user_id': 'user_3BsMgn2b8RMV5TZvNZ8sAhgKhBG'}",
+42b8c41f1a27,0,9,1778739909.6077428,7.986008783000216,3.0019694040001923,3362,177,3840,2160,qwen/qwen3-vl-32b-instruct,openrouter,ok,,"```json
+{
+  ""detections"": [
+    {
+      ""event"": ""person"",
+      ""count"": 1,
+      ""bbox"": [357, 641, 378, 661]
+    },
+    {
+      ""event"": ""vehicle"",
+      ""count"": 3,
+      ""bbox"": [
+        [0, 14, 43, 81],
+        [33, 923, 73, 999],
+        [424, 801, 454, 897]
+      ]
+    },
+    {
+      ""event"": ""fire or smoke"",
+      ""count"": 0
+    },
+    {
+      ""event"": ""intrusion"",
+      ""count"": 0
+    }
+  ]
+}
+```"
+42b8c41f1a27,0,10,1778739920.4518244,5.92167163799968,3.896964483999909,3363,31,3840,2160,qwen/qwen3-vl-32b-instruct,openrouter,ok,,"```json
+{
+  ""person"": [],
+  ""vehicle"": [],
+  ""fire_or_smoke"": [],
+  ""intrusion"": []
+}
+```"
+42b8c41f1a27,0,11,1778739931.567907,8.32185679000031,3.229774874999748,3363,222,3840,2160,qwen/qwen3-vl-32b-instruct,openrouter,ok,,"```json
+{
+  ""detections"": [
+    {
+      ""event"": ""person"",
+      ""count"": 1,
+      ""bbox"": [321, 196, 343, 217]
+    },
+    {
+      ""event"": ""vehicle"",
+      ""count"": 5,
+      ""bbox"": [
+        [0, 487, 25, 572],
+        [456, 285, 482, 375],
+        [538, 80, 563, 178],
+        [660, 249, 687, 333],
+        [657, 444, 684, 537]
+      ]
+    },
+    {
+      ""event"": ""fire or smoke"",
+      ""count"": 0
+    },
+    {
+      ""event"": ""intrusion"",
+      ""count"": 0
+    }
+  ]
+}
+```"

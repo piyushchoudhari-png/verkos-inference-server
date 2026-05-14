@@ -14,8 +14,12 @@ dependencies = [
     "pyyaml>=6.0.3",
     "vllm>=0.20.2",
     "opencv-python-headless>=4.13.0.92",
-    "plotly>=6.7.0",
+    "openai>=2.36.0",
+    "python-dotenv>=1.2.2",
 ]
+
+[project.scripts]
+simulator = "src.__main__:main"
 
 [tool.ruff]
 line-length = 120
@@ -54,9 +58,6 @@ ignore_missing_imports = true
 module = "cv2.*"
 ignore_missing_imports = true
 
-[[tool.mypy.overrides]]
-module = "plotly.*"
-ignore_missing_imports = true
 
 [[tool.mypy.overrides]]
 module = "pynvml"

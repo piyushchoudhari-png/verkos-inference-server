@@ -1,0 +1,40 @@
+# VLM GPU profiling simulator config
+# Run: python -m src --config src/config/sim_config.yaml
+
+# inference_mode: "local" uses a vLLM engine on this machine
+# inference_mode: "openrouter" sends requests to OpenRouter API
+inference_mode: openrouter
+
+# Required when inference_mode = openrouter
+# api_key is read from OPENROUTER_API_KEY in .env (never put it here)
+openrouter:
+  model: "qwen/qwen3-vl-32b-instruct"
+  base_url: "https://openrouter.ai/api/v1"
+  timeout_s: 60.0
+
+# Required when inference_mode = local
+# model_path: "/path/to/model/weights"
+
+video_paths:
+  - "/home/capybara/code/flytbase/verkos-inference-server/src/data/video.mp4"
+
+prompts_file: "/home/capybara/code/flytbase/verkos-inference-server/src/config/prompts.yaml"
+
+num_feeds: 1
+frame_interval_s: 10.0
+run_duration_s: 120.0
+# max_frames_per_feed: 20
+
+downscale_factor: null
+# resolution: [640, 360]
+
+gpu_poll_interval_s: 0.5
+
+max_tokens: 812
+temperature: 0.7
+dtype: "auto"
+gpu_memory_utilization: 0.90
+tensor_parallel_size: 1
+
+output_dir: "./results"
+# run_id: "my_run_001"
