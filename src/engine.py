@@ -63,6 +63,8 @@ def create_engine(config: SimConfig, stat_logger: Any | None = None) -> Any:
         "gpu_memory_utilization": config.gpu_memory_utilization,
         "tensor_parallel_size": config.tensor_parallel_size,
     }
+    if config.max_model_len is not None:
+        engine_kwargs["max_model_len"] = config.max_model_len
     engine_args = AsyncEngineArgs(**engine_kwargs)
 
     if stat_logger is not None:

@@ -29,6 +29,7 @@ class SimConfig(BaseModel):
     resolution: tuple[int, int] | None = None
     downscale_factor: float | None = None
     gpu_poll_interval_s: float = 0.5
+    max_model_len: int | None = None
     max_tokens: int = 256
     temperature: float = 0.0
     dtype: str = "auto"
