@@ -182,3 +182,5 @@ xgrammar==0.2.0
 yarl==1.23.0
 z3-solver==4.15.4.0
 zipp==3.23.1
+streamlit
+plotly

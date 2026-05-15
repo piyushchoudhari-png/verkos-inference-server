@@ -35,7 +35,7 @@ class SimConfig(BaseModel):
     dtype: str = "auto"
     gpu_memory_utilization: float = 0.90
     tensor_parallel_size: int = 1
-    output_dir: str = "./sim_results"
+    output_dir: str = "./runs"
     run_id: str | None = None
     inference_mode: Literal["local", "openrouter"] = "local"
     openrouter: OpenRouterConfig | None = None

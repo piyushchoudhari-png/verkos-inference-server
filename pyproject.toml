@@ -16,10 +16,13 @@ dependencies = [
     "opencv-python-headless>=4.13.0.92",
     "openai>=2.36.0",
     "python-dotenv>=1.2.2",
+    "streamlit>=1.57.0",
+    "plotly>=6.7.0",
 ]
 
 [project.scripts]
 simulator = "src.__main__:main"
+bench = "bench.__main__:main"
 
 [tool.ruff]
 line-length = 120

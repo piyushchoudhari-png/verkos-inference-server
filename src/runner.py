@@ -11,7 +11,7 @@ from src.engine_poller import SchedulerStatLogger, drain_loop
 from src.feed_runner import run_feed
 from src.gpu_poller import poll_gpu
 from src.metrics import EngineSample, GpuSample, IdleBaseline, MetricSample
-from src.reporter import write_results
+from src.reporter import write_results, write_run_meta_stub
 
 log = logging.getLogger("src.runner")
 
@@ -37,6 +37,8 @@ async def execute_run(
     model_name = Path(config.model_path).name if config.model_path else (
         config.openrouter.model if config.openrouter else "unknown"
     )
+
+    write_run_meta_stub(config, run_id)
 
     baselines: list[IdleBaseline] = []
     if config.inference_mode == "local":

@@ -35,5 +35,5 @@ dtype: "auto"
 gpu_memory_utilization: 0.90
 tensor_parallel_size: 1
 
-output_dir: "./results"
+output_dir: "./runs"
 # run_id: "my_run_001"

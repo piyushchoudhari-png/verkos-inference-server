@@ -14,8 +14,8 @@ except ImportError:
 class VideoFrameSource:
     """Async generator that yields (frame_index, PIL.Image) at a fixed time interval.
 
-    Loops the video when it ends, so a short clip can feed a long run.
-    Termination is controlled by max_frames or externally via asyncio task cancellation.
+    When max_frames is None, stops when the video ends (no looping).
+    When max_frames is set, loops the video until that frame count is reached.
     """
 
     def __init__(
@@ -61,14 +61,17 @@ class VideoFrameSource:
                 if self._max_frames is not None and frame_index >= self._max_frames:
                     break
 
-                # Loop the video when reaching the end
                 if video_duration_ms > 0 and pos_ms >= video_duration_ms:
+                    if self._max_frames is None:
+                        break
                     pos_ms = pos_ms % video_duration_ms
 
                 cap.set(cv2.CAP_PROP_POS_MSEC, pos_ms)
                 ret, frame_bgr = cap.read()
                 if not ret:
-                    # Retry from beginning on failed read
+                    if self._max_frames is None:
+                        break
+                    # Loop mode: retry from beginning on failed read
                     pos_ms = 0.0
                     cap.set(cv2.CAP_PROP_POS_MSEC, 0.0)
                     ret, frame_bgr = cap.read()

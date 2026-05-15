@@ -1,5 +1,6 @@
 import json
 import logging
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
@@ -7,6 +8,93 @@ log = logging.getLogger("src.reporter")
 
 from src.config import SimConfig
 from src.metrics import EngineSample, GpuSample, IdleBaseline, MetricSample, aggregate
+
+
+def _mask_config(config: SimConfig) -> dict[str, Any]:
+    d = config.model_dump()
+    if isinstance(d.get("openrouter"), dict):
+        d["openrouter"]["api_key"] = "***"
+    return d
+
+
+def _model_label(config: SimConfig) -> str:
+    if config.model_path:
+        return Path(config.model_path).name
+    if config.openrouter:
+        return config.openrouter.model
+    return "unknown"
+
+
+def write_run_meta_stub(config: SimConfig, run_id: str) -> None:
+    """Write run_meta.json (status=running) and config_snapshot.json before feeds start."""
+    out = Path(config.output_dir) / run_id
+    out.mkdir(parents=True, exist_ok=True)
+    meta: dict[str, Any] = {
+        "run_id": run_id,
+        "started_at_iso": datetime.now(timezone.utc).isoformat(),
+        "finished_at_iso": None,
+        "inference_mode": config.inference_mode,
+        "model": _model_label(config),
+        "num_feeds": config.num_feeds,
+        "video_paths": config.video_paths,
+        "status": "running",
+        "total_frames": None,
+        "successful_frames": None,
+        "error_count": None,
+        "latency_p50_ms": None,
+        "throughput_fps": None,
+    }
+    (out / "run_meta.json").write_text(json.dumps(meta, indent=2))
+    (out / "config_snapshot.json").write_text(json.dumps(_mask_config(config), indent=2))
+
+
+def _write_final_run_meta(
+    metric_samples: list[MetricSample],
+    config: SimConfig,
+    run_id: str,
+    out: Path,
+) -> None:
+    stats = aggregate(metric_samples)
+    if metric_samples:
+        start_ts = min(s.t0_epoch for s in metric_samples)
+        end_ts = max(s.t0_epoch + s.latency_s for s in metric_samples)
+        started_iso = datetime.fromtimestamp(start_ts, tz=timezone.utc).isoformat()
+        finished_iso = datetime.fromtimestamp(end_ts, tz=timezone.utc).isoformat()
+    else:
+        now = datetime.now(timezone.utc).isoformat()
+        started_iso = now
+        finished_iso = now
+
+    # Preserve started_at_iso from stub if it exists
+    stub_path = out / "run_meta.json"
+    if stub_path.exists():
+        try:
+            existing = json.loads(stub_path.read_text())
+            if existing.get("started_at_iso"):
+                started_iso = existing["started_at_iso"]
+        except Exception:
+            pass
+
+    meta: dict[str, Any] = {
+        "run_id": run_id,
+        "started_at_iso": started_iso,
+        "finished_at_iso": finished_iso,
+        "inference_mode": config.inference_mode,
+        "model": _model_label(config),
+        "num_feeds": config.num_feeds,
+        "video_paths": config.video_paths,
+        "status": "completed",
+        "total_frames": stats.get("total_frames", 0),
+        "successful_frames": stats.get("successful_frames", 0),
+        "error_count": stats.get("error_count", 0),
+        "latency_p50_ms": stats.get("latency_p50_ms", 0.0),
+        "throughput_fps": stats.get("throughput_fps", 0.0),
+    }
+    stub_path.write_text(json.dumps(meta, indent=2))
+    # Write config_snapshot if not already written by stub
+    snap_path = out / "config_snapshot.json"
+    if not snap_path.exists():
+        snap_path.write_text(json.dumps(_mask_config(config), indent=2))
 
 
 def _gb(b: int) -> str:
@@ -133,6 +221,10 @@ def write_results(
     _write_json(gpu_samples, gpu_path)
     paths["gpu"] = gpu_path
 
+    baselines_path = out / "baselines.json"
+    _write_json(baselines, baselines_path)
+    paths["baselines"] = baselines_path
+
     engine_path = out / "engine.json"
     _write_json(engine_samples, engine_path)
     paths["engine"] = engine_path
@@ -152,5 +244,7 @@ def write_results(
     n = annotate_run(out / "frames", metric_samples)
     if n:
         log.info("annotated %d frames with bounding boxes", n)
+
+    _write_final_run_meta(metric_samples, config, run_id, out)
 
     return paths

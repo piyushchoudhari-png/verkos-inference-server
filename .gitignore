@@ -211,6 +211,14 @@ models/
 # Simulator results
 results/
 
+# Test bench run artifacts (keep the directory, ignore contents)
+runs/*
+!runs/.gitkeep
+
+# Test bench temp configs / uploads
+bench/tmp/*
+!bench/tmp/.gitkeep
+
 # Large media files
 *.mp4
 *.avi
