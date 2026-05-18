@@ -78,11 +78,10 @@ def create_engine(config: SimConfig, stat_logger: Any | None = None) -> Any:
     return AsyncLLMEngine.from_engine_args(engine_args)
 
 
-async def get_tokenizer(engine: Any) -> Any:
-    result = engine.get_tokenizer()
-    if asyncio.iscoroutine(result):
-        return await result
-    return result
+async def get_tokenizer(engine: Any, model_path: str) -> Any:
+    from transformers import AutoProcessor
+
+    return AutoProcessor.from_pretrained(model_path, trust_remote_code=True)
 
 
 def measure_idle_vram(run_id: str) -> list[IdleBaseline]:

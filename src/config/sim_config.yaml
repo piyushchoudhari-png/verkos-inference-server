@@ -30,7 +30,7 @@ downscale_factor: null
 gpu_poll_interval_s: 0.5
 
 max_tokens: 812
-temperature: 0.7
+temperature: 0.0
 dtype: "auto"
 gpu_memory_utilization: 0.90
 tensor_parallel_size: 1

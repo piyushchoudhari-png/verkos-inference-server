@@ -38,14 +38,14 @@ def _build_inputs(
             ],
         },
     ]
-
-    token_ids: list[int] = tokenizer.apply_chat_template(
+    prompt_text: str = tokenizer.apply_chat_template(
         messages,
-        tokenize=True,
+        tokenize=False,
         add_generation_prompt=True,
     )
+    log.debug("prompt_text (first 500 chars): %s", prompt_text[:500])
     return {
-        "prompt_token_ids": token_ids,
+        "prompt": prompt_text,
         "multi_modal_data": {"image": image},
     }
 

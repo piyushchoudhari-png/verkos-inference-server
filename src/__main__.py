@@ -36,7 +36,8 @@ async def run(config: SimConfig, run_id: str) -> None:
         log.info("loading engine …")
         stat_logger = SchedulerStatLogger(run_id=run_id)
         engine = create_engine(config, stat_logger=stat_logger)
-        tokenizer = await get_tokenizer(engine)
+        assert config.model_path is not None
+        tokenizer = await get_tokenizer(engine, config.model_path)
         log.info("engine ready")
     else:
         assert config.openrouter is not None
