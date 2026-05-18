@@ -184,3 +184,4 @@ z3-solver==4.15.4.0
 zipp==3.23.1
 streamlit
 plotly
+openpyxl
