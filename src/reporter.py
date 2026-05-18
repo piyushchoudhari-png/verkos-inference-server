@@ -1,6 +1,6 @@
 import json
 import logging
-from datetime import datetime, timezone
+from datetime import datetime
 from pathlib import Path
 from typing import Any
 
@@ -31,7 +31,7 @@ def write_run_meta_stub(config: SimConfig, run_id: str) -> None:
     out.mkdir(parents=True, exist_ok=True)
     meta: dict[str, Any] = {
         "run_id": run_id,
-        "started_at_iso": datetime.now(timezone.utc).isoformat(),
+        "started_at_iso": datetime.now().astimezone().isoformat(),
         "finished_at_iso": None,
         "inference_mode": config.inference_mode,
         "model": _model_label(config),
@@ -58,10 +58,10 @@ def _write_final_run_meta(
     if metric_samples:
         start_ts = min(s.t0_epoch for s in metric_samples)
         end_ts = max(s.t0_epoch + s.latency_s for s in metric_samples)
-        started_iso = datetime.fromtimestamp(start_ts, tz=timezone.utc).isoformat()
-        finished_iso = datetime.fromtimestamp(end_ts, tz=timezone.utc).isoformat()
+        started_iso = datetime.fromtimestamp(start_ts).astimezone().isoformat()
+        finished_iso = datetime.fromtimestamp(end_ts).astimezone().isoformat()
     else:
-        now = datetime.now(timezone.utc).isoformat()
+        now = datetime.now().astimezone().isoformat()
         started_iso = now
         finished_iso = now
 

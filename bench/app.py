@@ -13,6 +13,8 @@ if str(ROOT) not in sys.path:
 
 RUNS_DIR = ROOT / "runs"
 RUNS_DIR.mkdir(exist_ok=True)
+BENCHMARKS_DIR = ROOT / "benchmarks"
+BENCHMARKS_DIR.mkdir(exist_ok=True)
 
 # Clean up temp configs older than 24 h
 _tmp = ROOT / "bench" / "tmp"
@@ -35,7 +37,7 @@ for _key in ("selected_run_id", "last_run_id", "active_subprocess", "video_paths
 
 st.title("Verkos Inference Test Bench")
 
-tab_results, tab_configure = st.tabs(["🔬 Results", "⚙️ Configure & Run"])
+tab_results, tab_configure, tab_benchmark = st.tabs(["🔬 Results", "⚙️ Configure & Run", "📐 Benchmark"])
 
 with tab_results:
     from bench.tabs.results import render_results
@@ -44,3 +46,7 @@ with tab_results:
 with tab_configure:
     from bench.tabs.configure import render_configure
     render_configure(ROOT, RUNS_DIR)
+
+with tab_benchmark:
+    from bench.tabs.benchmark import render_benchmark
+    render_benchmark(ROOT, RUNS_DIR, BENCHMARKS_DIR)

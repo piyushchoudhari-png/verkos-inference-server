@@ -1,0 +1,11 @@
+{
+  "benchmark_id": "bm-3d4e15f2-20260518072325",
+  "started_at_iso": "2026-05-18T01:57:43.499160+00:00",
+  "local_run_id": "bm-3d4e15f2-20260518072325-local",
+  "or_run_id": "bm-3d4e15f2-20260518072325-openrouter",
+  "local_model": "/home/capybara/code/flytbase/verkos-inference-server/models/smolvlm-256m",
+  "or_model": "qwen/qwen3-vl-32b-instruct",
+  "local_status": "completed",
+  "or_status": "completed",
+  "status": "completed"
+}
