@@ -1,9 +1,12 @@
 import asyncio
+import logging
 import time
 import uuid
 from datetime import datetime
 from pathlib import Path
 from typing import Any
+
+log = logging.getLogger("src.feed_runner")
 
 from src.config import PromptConfig, SimConfig
 from src.frame_extractor import VideoFrameSource
@@ -40,6 +43,10 @@ def _build_inputs(
         tokenize=False,
         add_generation_prompt=True,
     )
+    has_vision = "<|vision_start|>" in prompt_text or "<image>" in prompt_text
+    log.debug("vision tokens present: %s | prompt length: %d chars", has_vision, len(prompt_text))
+    if not has_vision:
+        log.warning("no vision tokens in prompt — image may not be embedded correctly for this model")
     return {
         "prompt": prompt_text,
         "multi_modal_data": {"image": image},
