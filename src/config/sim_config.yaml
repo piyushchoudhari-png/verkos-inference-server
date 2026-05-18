@@ -35,5 +35,14 @@ dtype: "auto"
 gpu_memory_utilization: 0.90
 tensor_parallel_size: 1
 
+# Qwen3-VL image preprocessing budget. Must match HF defaults (which OpenRouter uses)
+# or the model sees a downsampled image and cannot spatially ground objects.
+# Units are pixels; 28*28 is the patch size, so values are typically <patches>*28*28.
+mm_processor_kwargs:
+  min_pixels: 3136       # 4 * 28 * 28
+  max_pixels: 12845056   # 16384 * 28 * 28 (~12.8M px)
+limit_mm_per_prompt:
+  image: 1
+
 output_dir: "./runs"
 # run_id: "my_run_001"

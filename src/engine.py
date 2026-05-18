@@ -65,6 +65,10 @@ def create_engine(config: SimConfig, stat_logger: Any | None = None) -> Any:
     }
     if config.max_model_len is not None:
         engine_kwargs["max_model_len"] = config.max_model_len
+    if config.mm_processor_kwargs is not None:
+        engine_kwargs["mm_processor_kwargs"] = config.mm_processor_kwargs
+    if config.limit_mm_per_prompt is not None:
+        engine_kwargs["limit_mm_per_prompt"] = config.limit_mm_per_prompt
     engine_args = AsyncEngineArgs(**engine_kwargs)
 
     if stat_logger is not None:
