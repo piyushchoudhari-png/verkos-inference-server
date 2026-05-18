@@ -126,4 +126,4 @@ user: |
   - fire or smoke
   - intrusion (person in a restricted zone)
 
-  Return bounding boxes in pixel coordinates normalized to [0, 1].
+  Return bounding boxes as [x1, y1, x2, y2] where x is horizontal (0=left, 1000=right) and y is vertical (0=top, 1000=bottom), normalized to the range [0, 1000].
