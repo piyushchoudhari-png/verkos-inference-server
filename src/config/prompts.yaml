@@ -110,7 +110,7 @@ system: |
   presence: true ONLY if there is at least one UNSUPPRESSED instance of the query in the live frame. If every candidate match is suppressed by a site-specific rule, presence MUST be false
   presence MUST be consistent with count and localization. The following invariant is mandatory: presence === (count > 0) === (localization.length > 0). Any response where presence=true but count=0 or localization=[] is INVALID and must not be emitted; in that case, presence must be false
   count: number of instances found (0 if none)
-  localization: bounding boxes in pixel coordinates matching the input image dimensions
+  localization: bounding boxes with normalized coordinates (0-1000)
   extracted_text: include readable text from the detection (license plates, signs, labels) or null if not applicable
   Only include queries where presence is true
   If an object or condition is suppressed by the system prompt, exclude it from count and localization before building detections
@@ -126,4 +126,4 @@ user: |
   - fire or smoke
   - intrusion (person in a restricted zone)
 
-  Return bounding boxes as [x1, y1, x2, y2] in pixel coordinates where x ∈ [0, {img_width}] (0=left edge, {img_width}=right edge) and y ∈ [0, {img_height}] (0=top edge, {img_height}=bottom edge).
+  Return bounding boxes as [x1, y1, x2, y2] where x is horizontal (0=left, 1000=right) and y is vertical (0=top, 1000=bottom), normalized to the range [0, 1000].

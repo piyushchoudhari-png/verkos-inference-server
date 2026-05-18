@@ -24,9 +24,7 @@ def _build_inputs(
     image: Any,
     model_name: str,
 ) -> Any:
-    img_w: int = getattr(image, "width", 0)
-    img_h: int = getattr(image, "height", 0)
-    user_text = prompt.user.format(frame_index=frame_index, img_width=img_w, img_height=img_h)
+    user_text = prompt.user.format(frame_index=frame_index)
     messages = [
         {"role": "system", "content": prompt.system},
         {
