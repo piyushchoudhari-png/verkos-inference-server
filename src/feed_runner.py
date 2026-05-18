@@ -43,7 +43,9 @@ def _build_inputs(
         tokenize=False,
         add_generation_prompt=True,
     )
-    log.debug("prompt_text (first 500 chars): %s", prompt_text[:500])
+    has_vision = "<|image_pad|>" in prompt_text or "<|vision_start|>" in prompt_text
+    user_tail = prompt_text.split("<|im_start|>user", 1)[-1][:400]
+    print("prompt has_vision_tokens=%s user_section_head=%r", has_vision, user_tail)
     return {
         "prompt": prompt_text,
         "multi_modal_data": {"image": image},
