@@ -38,17 +38,14 @@ def _build_inputs(
             ],
         },
     ]
-    prompt_text: str = tokenizer.apply_chat_template(
+
+    token_ids: list[int] = tokenizer.apply_chat_template(
         messages,
-        tokenize=False,
+        tokenize=True,
         add_generation_prompt=True,
     )
-    has_vision = "<|vision_start|>" in prompt_text or "<image>" in prompt_text
-    log.debug("vision tokens present: %s | prompt length: %d chars", has_vision, len(prompt_text))
-    if not has_vision:
-        log.warning("no vision tokens in prompt — image may not be embedded correctly for this model")
     return {
-        "prompt": prompt_text,
+        "prompt_token_ids": token_ids,
         "multi_modal_data": {"image": image},
     }
 
