@@ -9,47 +9,28 @@ from typing import Any
 log = logging.getLogger("src.feed_runner")
 
 from src.config import PromptConfig, SimConfig
+from src.engine import SamplingParams
 from src.frame_extractor import VideoFrameSource
 from src.metrics import MetricSample
 
-try:
-    from vllm.sampling_params import SamplingParams
-
-    _VLLM_AVAILABLE = True
-except ImportError:
-    _VLLM_AVAILABLE = False
-
 
 def _build_inputs(
-    tokenizer: Any,
     prompt: PromptConfig,
     frame_index: int,
     image: Any,
-    model_name: str,
-) -> Any:
+) -> dict[str, Any]:
     user_text = prompt.user.format(frame_index=frame_index)
     messages = [
         {"role": "system", "content": prompt.system},
         {
             "role": "user",
             "content": [
-                {"type": "image"},
+                {"type": "image", "image": image},
                 {"type": "text", "text": user_text},
             ],
         },
     ]
-    prompt_text: str = tokenizer.apply_chat_template(
-        messages,
-        tokenize=False,
-        add_generation_prompt=True,
-    )
-    has_vision = "<|image_pad|>" in prompt_text or "<|vision_start|>" in prompt_text
-    user_tail = prompt_text.split("<|im_start|>user", 1)[-1][:400]
-    print("prompt has_vision_tokens=%s user_section_head=%r", has_vision, user_tail)
-    return {
-        "prompt": prompt_text,
-        "multi_modal_data": {"image": image},
-    }
+    return {"messages": messages, "image": image}
 
 
 async def _infer_frame_local(
@@ -57,22 +38,19 @@ async def _infer_frame_local(
     frame_index: int,
     image: Any,
     engine: Any,
-    tokenizer: Any,
+    tokenizer: Any,  # noqa: ARG001 — kept for signature parity with openrouter path
     prompt: PromptConfig,
     config: SimConfig,
     metric_sink: asyncio.Queue[MetricSample],
     run_id: str,
     model_name: str,
 ) -> None:
-    if not _VLLM_AVAILABLE:
-        raise RuntimeError("vLLM not available")
-
     sampling_params = SamplingParams(
         temperature=config.temperature,
         max_tokens=config.max_tokens,
         n=1,
     )
-    inputs = _build_inputs(tokenizer, prompt, frame_index, image, model_name)
+    inputs = _build_inputs(prompt, frame_index, image)
     request_id = f"{uuid.uuid4().hex[:8]}-{datetime.now().strftime('%Y%m%d%H%M%S%f')}"
 
     resolution_w: int = getattr(image, "width", 0)
@@ -103,6 +81,7 @@ async def _infer_frame_local(
     except Exception as exc:
         status = "error"
         error_msg = str(exc)
+        log.exception("inference failed feed=%d frame=%d", feed_id, frame_index)
 
     latency_s = time.monotonic() - t0_mono
     await metric_sink.put(

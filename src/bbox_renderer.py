@@ -38,24 +38,17 @@ def _strip_fences(text: str) -> str:
 def _detect_scale(boxes: list[tuple[int, int, int, int]], img_w: int, img_h: int) -> tuple[float, float]:
     """Return (sx, sy) to convert bbox coords to pixel space.
 
-    Qwen VL (and similar) outputs coords in [0, 1000] regardless of image size.
-    Three cases:
-    - All coords ≤ 1.0 → normalized [0, 1].
-    - All coords fit in [0, 1000] but image is larger than 1000 → Qwen 1000-space.
-      This is the case that breaks on 4K/HD inputs: coords like [101, 951] look like
-      valid pixels on a 1080p frame but are actually 1000-space units.
-    - Any coord exceeds the image dimensions → must be 1000-space even on smaller images.
+    The system prompt mandates Qwen-VL 0-1000 normalized coords for every event.
+    Normalized [0, 1] is also supported for robustness against alt models.
+    Raw-pixel output is no longer assumed — it caused silent mis-rendering when
+    the image dimensions happened to match the coord-space ceiling.
     """
     if not boxes:
         return 1.0, 1.0
     max_val = max(v for box in boxes for v in box)
     if max_val <= 1.0:
         return float(img_w), float(img_h)
-    if max_val <= 1000 and max(img_w, img_h) > 1000:
-        return img_w / 1000.0, img_h / 1000.0
-    if max_val > max(img_w, img_h):
-        return img_w / 1000.0, img_h / 1000.0
-    return 1.0, 1.0
+    return img_w / 1000.0, img_h / 1000.0
 
 
 def _scale_box(
