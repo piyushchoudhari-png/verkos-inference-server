@@ -10,6 +10,10 @@ The full design is in [`docs/INFERENCE_API_ARCHITECTURE.md`](docs/INFERENCE_API_
 **Read it before touching anything under `src/serving/` or the HTTP contract** —
 it is the source of truth.
 
+For a step-by-step setup, run, test, and operations walkthrough — installing
+sglang, filling in configs, minting keys, smoke-testing endpoints, opening
+Swagger, troubleshooting — see [`docs/SETUP.md`](docs/SETUP.md).
+
 ## Topology
 
 ```

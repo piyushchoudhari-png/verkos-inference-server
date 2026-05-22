@@ -11,11 +11,11 @@
 #   ./tests/api/run.sh
 #
 # Optional env vars:
-#   CHAT_MODEL=chat-vlm        # catalog id of the chat/VLM model
-#   EMBED_MODEL=bge-embed      # catalog id of the embedding model
-#   SKIP_INFERENCE=1           # only run no-load tests (health, auth, catalog, errors)
-#   SKIP_SWAP=1                # skip the chat→embed→chat swap test
-#   COLD_START_TIMEOUT=180     # seconds curl waits on a /load (default 180)
+#   CHAT_MODEL=qwen3-8b-vl-instruct      # catalog id of the chat/VLM model
+#   EMBED_MODEL=qwen3-vl-embedding-2b    # catalog id of the embedding model
+#   SKIP_INFERENCE=1                     # only run no-load tests (health, auth, catalog, errors)
+#   SKIP_SWAP=1                          # skip the chat→embed→chat swap test
+#   COLD_START_TIMEOUT=180               # seconds curl waits on a /load (default 180)
 #
 # Requires: curl, jq.
 
@@ -27,8 +27,8 @@ set -o pipefail
 
 GATEWAY_URL="${GATEWAY_URL:-http://localhost:8000}"
 API_KEY="${API_KEY:-}"
-CHAT_MODEL="${CHAT_MODEL:-chat-vlm}"
-EMBED_MODEL="${EMBED_MODEL:-bge-embed}"
+CHAT_MODEL="${CHAT_MODEL:-qwen3-8b-vl-instruct}"
+EMBED_MODEL="${EMBED_MODEL:-qwen3-vl-embedding-2b}"
 SKIP_INFERENCE="${SKIP_INFERENCE:-0}"
 SKIP_SWAP="${SKIP_SWAP:-0}"
 COLD_START_TIMEOUT="${COLD_START_TIMEOUT:-180}"
