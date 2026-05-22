@@ -4,8 +4,6 @@ Loads the gateway config, configures structured logging, and hands the FastAPI
 app to uvicorn. See architecture doc §A.9.
 """
 
-from __future__ import annotations
-
 import argparse
 import logging
 import sys

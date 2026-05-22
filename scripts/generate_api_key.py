@@ -17,8 +17,6 @@ The ``keys.json`` file is gitignored. In production, keep it in ``/etc/verkos/``
 owned by the gateway process user with mode ``0600``.
 """
 
-from __future__ import annotations
-
 import argparse
 import datetime as dt
 import json

@@ -14,6 +14,14 @@ Before working in these areas, read the doc first — it is the source of truth 
 The CLI bench harness (`src/`, `bench/`, `src/__main__.py`, `src/feed_runner.py`) is independent of the serving stack and uses its own config (`src/config.py`) — do not entangle the two.
 
 
+## Python conventions
+
+- **No `from __future__ import annotations`.** We target Python 3.12, where
+  PEP 604 union syntax (`str | None`), built-in generics (`list[int]`), and
+  modern typing all work without it. Don't add the import to new files; remove
+  it when you encounter it. For class self-references in `classmethod`
+  factories, use `typing.Self` instead of forward-string annotations.
+
 ## 1. Think Before Coding
 
 **Don't assume. Don't hide confusion. Surface tradeoffs.**

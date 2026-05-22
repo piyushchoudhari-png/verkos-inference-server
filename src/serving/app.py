@@ -5,8 +5,6 @@ and :mod:`.errors` into one ASGI app. Endpoint surface is defined in
 architecture doc §A.2; per-route behavior is documented inline below.
 """
 
-from __future__ import annotations
-
 import asyncio
 import contextlib
 import json

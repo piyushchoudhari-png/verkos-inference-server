@@ -17,8 +17,6 @@ resolves correctly:
     uv run verkos-launch-worker --config workers/chat-vlm.yaml --python /opt/venv/bin/python
 """
 
-from __future__ import annotations
-
 import argparse
 import os
 import shlex
