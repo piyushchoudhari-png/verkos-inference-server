@@ -1,0 +1,32 @@
+# Embedding worker — fronted by an sglang.launch_server process in embedding mode.
+#
+# Same schema as workers/chat-vlm.yaml; see that file's preamble for the rules
+# (loopback bind, snake→kebab flag translation, capabilities-as-metadata).
+#
+# Differences from a chat worker:
+#   - `sglang.is_embedding: true` switches sglang to embedding mode.
+#   - No `chat_template` — embeddings never run a chat template.
+#   - capabilities.embeddings = true; chat/vision = false.
+
+worker:
+  name: "bge-embed"
+  host: "127.0.0.1"
+  # Pre-assigned per-model loopback port; do not collide with chat-vlm (30001).
+  port: 30002
+
+sglang:
+  # Operator-provided weights path. The launcher does not download models.
+  model_path: "/models/bge-embed"
+  # Client-facing identifier — what users send in the OpenAI `model` field.
+  served_model_name: "bge-embed"
+  dtype: "bfloat16"
+  # Embedding models are small; the slot is single-model so they still get the
+  # whole card. Trim if your GPU is shared with non-Verkos workloads.
+  mem_fraction_static: 0.5
+  is_embedding: true
+
+capabilities:
+  chat: false
+  vision: false
+  embeddings: true
+  max_context_tokens: 512

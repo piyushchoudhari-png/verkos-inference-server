@@ -1,0 +1,49 @@
+# Verkos inference gateway — systemd unit (single unit; sglang is the gateway's child).
+#
+# Install:
+#   sudo cp deploy/systemd/verkos-gateway.service /etc/systemd/system/
+#   sudo systemctl daemon-reload
+#   sudo systemctl enable --now verkos-gateway
+#
+# Prereqs:
+#   - A `verkos` user owning /etc/verkos/ (mode 0750) and /etc/verkos/keys.json (mode 0600).
+#   - /etc/verkos/gateway.yaml in place (see gateway.yaml.example).
+#   - The repo checked out at /opt/verkos with `uv sync` already run.
+
+[Unit]
+Description=Verkos inference gateway (FastAPI + sglang single-slot manager)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=verkos
+Group=verkos
+WorkingDirectory=/opt/verkos
+Environment=VERKOS_GATEWAY_CONFIG=/etc/verkos/gateway.yaml
+ExecStart=/opt/verkos/.venv/bin/python -m src.serving --config /etc/verkos/gateway.yaml
+
+# Reload keys.json without restarting the gateway: `systemctl reload verkos-gateway`.
+ExecReload=/bin/kill -HUP $MAINPID
+
+# Give the manager time to SIGKILL the sglang child and await it during shutdown.
+KillSignal=SIGTERM
+TimeoutStopSec=30
+
+Restart=on-failure
+RestartSec=5
+
+# Hardening — the gateway only needs to read its config, write its log, and talk to the GPU.
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+ReadWritePaths=/var/log/verkos
+# Allow access to NVIDIA device nodes for NVML / sglang.
+DeviceAllow=/dev/nvidia0 rw
+DeviceAllow=/dev/nvidiactl rw
+DeviceAllow=/dev/nvidia-uvm rw
+DeviceAllow=/dev/nvidia-modeset rw
+
+[Install]
+WantedBy=multi-user.target

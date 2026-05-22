@@ -1,0 +1,33 @@
+# Verkos inference gateway — Prometheus scrape job.
+#
+# Drop this into the `scrape_configs` block of your prometheus.yml (or symlink
+# from /etc/prometheus/scrape_configs.d/ if your Prometheus build supports it).
+#
+# Metrics exposed by the gateway (see docs/INFERENCE_API_ARCHITECTURE.md §A.8):
+#   - verkos_requests_total{route,model,status}
+#   - verkos_request_duration_seconds{route,model}
+#   - verkos_tokens_total{model,kind=prompt|completion}
+#   - verkos_inflight_requests{route,model}
+#   - verkos_model_state{model,state=empty|loading|ready}
+#   - verkos_model_loads_total{model,result=ok|error}
+#   - verkos_model_load_duration_seconds{model}
+#   - verkos_gpu_memory_used_bytes{gpu}
+#   - verkos_gpu_memory_total_bytes{gpu}
+#   - verkos_gpu_utilization_ratio{gpu}
+#
+# Recommended dashboard panels:
+#   - Slot state by model (verkos_model_state, stack of 0/1 per state)
+#   - Cold-start latency P50/P95 (verkos_model_load_duration_seconds)
+#   - Per-route request rate + latency (verkos_requests_total, verkos_request_duration_seconds)
+#   - GPU VRAM headroom (verkos_gpu_memory_used_bytes vs verkos_gpu_memory_total_bytes)
+
+scrape_configs:
+  - job_name: verkos-gateway
+    scrape_interval: 15s
+    scrape_timeout: 5s
+    metrics_path: /metrics
+    static_configs:
+      - targets:
+          - "verkos-host.lan:8000"  # adjust to the gateway's LAN address
+        labels:
+          service: verkos-gateway

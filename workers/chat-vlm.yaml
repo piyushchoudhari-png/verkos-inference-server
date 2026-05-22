@@ -1,0 +1,34 @@
+# First chat/VLM worker — fronted by an sglang.launch_server process.
+#
+# - `worker.*` controls how the launcher binds the process and how the gateway
+#   reaches it. Workers MUST bind to 127.0.0.1; the gateway is the only ingress.
+# - `sglang.*` is forwarded verbatim to `sglang.launch_server`. snake_case keys
+#   become --kebab-case flags. bool true = bare flag; bool false = omitted.
+#   Any flag sglang accepts can be added here.
+# - `capabilities.*` is metadata only. The gateway reads this block to enrich
+#   GET /v1/models so clients can discover what each model supports without
+#   out-of-band knowledge.
+
+worker:
+  name: "chat-vlm"
+  host: "127.0.0.1"
+  port: 30001
+
+sglang:
+  # Operator-provided weights path. The launcher does not download models.
+  model_path: "/models/chat-vlm"
+  # Client-facing identifier — what users send in the OpenAI `model` field.
+  served_model_name: "chat-vlm"
+  dtype: "bfloat16"
+  mem_fraction_static: 0.85
+  # Chat template name shipped with sglang or a path to a Jinja file.
+  chat_template: "chatml"
+  # Embeddings worker would set: is_embedding: true (and drop chat_template).
+  # Any other sglang.launch_server flag is passed through verbatim.
+
+capabilities:
+  chat: true
+  vision: true
+  embeddings: false
+  max_context_tokens: 32768
+  max_image_pixels: 2000000

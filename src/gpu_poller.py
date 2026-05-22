@@ -1,20 +1,35 @@
+"""NVML-based GPU sampling.
+
+Kept from the original bench harness for reuse by the gateway metrics layer
+(see ``src/serving/metrics.py`` once Phase 4 lands). ``read_samples`` is the
+synchronous single-shot helper the Prometheus exporter will call; ``poll_gpu``
+is the legacy async-queue producer, preserved verbatim aside from the dropped
+``run_id``/torch dependencies.
+"""
+
 import asyncio
 import time
 import warnings
+from dataclasses import dataclass
 from typing import Any
-
-try:
-    import torch
-
-    _TORCH_AVAILABLE = True
-except ImportError:
-    _TORCH_AVAILABLE = False
 
 with warnings.catch_warnings():
     warnings.simplefilter("ignore", FutureWarning)
     import pynvml
 
-from src.metrics import GpuSample
+
+@dataclass(frozen=True)
+class GpuSample:
+    """One NVML reading for a single GPU at a point in time."""
+
+    t_epoch: float
+    gpu_index: int
+    memory_used_bytes: int
+    memory_total_bytes: int
+    gpu_util_pct: int
+    power_w: float | None
+    temperature_c: int | None
+
 
 _nvml_initialized: bool = False
 
@@ -31,15 +46,6 @@ def _ensure_nvml() -> bool:
         return False
 
 
-def _torch_allocated(gpu_index: int) -> int:
-    if not _TORCH_AVAILABLE:
-        return 0
-    try:
-        return int(torch.cuda.memory_allocated(device=gpu_index))
-    except Exception:
-        return 0
-
-
 def _power_w(handle: Any) -> float | None:
     try:
         return float(pynvml.nvmlDeviceGetPowerUsage(handle)) / 1000.0
@@ -54,41 +60,45 @@ def _temperature_c(handle: Any) -> int | None:
         return None
 
 
+def read_samples() -> list[GpuSample]:
+    """Read one sample per visible GPU. Empty list if NVML is unavailable."""
+    if not _ensure_nvml():
+        return []
+    try:
+        device_count = pynvml.nvmlDeviceGetCount()
+    except Exception:
+        return []
+
+    now = time.time()
+    samples: list[GpuSample] = []
+    for i in range(device_count):
+        try:
+            handle = pynvml.nvmlDeviceGetHandleByIndex(i)
+            mem = pynvml.nvmlDeviceGetMemoryInfo(handle)
+            util = pynvml.nvmlDeviceGetUtilizationRates(handle)
+            samples.append(
+                GpuSample(
+                    t_epoch=now,
+                    gpu_index=i,
+                    memory_used_bytes=mem.used,
+                    memory_total_bytes=mem.total,
+                    gpu_util_pct=util.gpu,
+                    power_w=_power_w(handle),
+                    temperature_c=_temperature_c(handle),
+                )
+            )
+        except Exception:
+            continue
+    return samples
+
+
 async def poll_gpu(
-    run_id: str,
     queue: asyncio.Queue[GpuSample],
     interval_s: float,
     stop_event: asyncio.Event,
 ) -> None:
-    if not _ensure_nvml():
-        return
-
-    try:
-        device_count = pynvml.nvmlDeviceGetCount()
-    except Exception:
-        return
-
+    """Push samples to ``queue`` every ``interval_s`` until ``stop_event`` is set."""
     while not stop_event.is_set():
-        t = time.time()
-        try:
-            for i in range(device_count):
-                handle = pynvml.nvmlDeviceGetHandleByIndex(i)
-                mem = pynvml.nvmlDeviceGetMemoryInfo(handle)
-                util = pynvml.nvmlDeviceGetUtilizationRates(handle)
-                await queue.put(
-                    GpuSample(
-                        run_id=run_id,
-                        t_epoch=t,
-                        gpu_index=i,
-                        memory_used_bytes=mem.used,
-                        memory_total_bytes=mem.total,
-                        torch_allocated_bytes=_torch_allocated(i),
-                        gpu_util_pct=util.gpu,
-                        power_w=_power_w(handle),
-                        temperature_c=_temperature_c(handle),
-                    )
-                )
-        except Exception:
-            pass
-
+        for sample in read_samples():
+            await queue.put(sample)
         await asyncio.sleep(interval_s)

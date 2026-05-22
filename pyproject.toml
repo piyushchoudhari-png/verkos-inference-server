@@ -1,29 +1,23 @@
 [project]
 name = "verkos-inference-server"
 version = "0.1.0"
-description = "Add your description here"
+description = "OpenAI-compatible inference gateway in front of sglang model workers."
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
     "fastapi[standard]>=0.136.1",
-    "pillow>=11.0.0",
-    "huggingface-hub>=1.14.0",
+    "httpx>=0.28.1",
     "pydantic-settings>=2.14.1",
-    "nvidia-ml-py",
     "python-json-logger>=4.1.0",
     "pyyaml>=6.0.3",
-    "vllm>=0.20.2",
-    "opencv-python-headless>=4.13.0.92",
-    "openai>=2.36.0",
-    "python-dotenv>=1.2.2",
-    "streamlit>=1.57.0",
-    "plotly>=6.7.0",
-    "openpyxl>=3.1.5",
+    "prometheus-client>=0.25.0",
+    "nvidia-ml-py",
 ]
 
 [project.scripts]
-simulator = "src.__main__:main"
-bench = "bench.__main__:main"
+verkos-gateway = "src.serving.__main__:main"
+verkos-generate-api-key = "scripts.generate_api_key:main"
+verkos-launch-worker = "scripts.launch_worker:main"
 
 [tool.ruff]
 line-length = 120
@@ -53,15 +47,6 @@ warn_return_any = true
 warn_unused_ignores = true
 disallow_untyped_defs = true
 disallow_incomplete_defs = true
-
-[[tool.mypy.overrides]]
-module = "vllm.*"
-ignore_missing_imports = true
-
-[[tool.mypy.overrides]]
-module = "cv2.*"
-ignore_missing_imports = true
-
 
 [[tool.mypy.overrides]]
 module = "pynvml"

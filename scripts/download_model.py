@@ -136,9 +136,7 @@ def main() -> None:
         print(f"ERROR: unknown source type '{source_type}'")
         sys.exit(1)
 
-    weight_files = [
-        f for f in files if f.is_file() and f.name != ".download_manifest.json"
-    ]
+    weight_files = [f for f in files if f.is_file() and f.name != ".download_manifest.json"]
     _write_manifest(weights_dir, source, weight_files)
     print("Done.")
 
