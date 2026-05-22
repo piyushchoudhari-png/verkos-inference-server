@@ -1,0 +1,43 @@
+# Per-model worker template.
+#
+# Copy this to workers/<your-model>.yaml, fill in every <PLACEHOLDER>, and
+# reference it from gateway.yaml's `models[].config_ref`.
+#
+# Field-by-field reference: docs/INFERENCE_API_ARCHITECTURE.md §B.3.
+
+worker:
+  name: "<MODEL_ID>"             # operator-facing label; convention: same as the gateway.yaml `id`
+  host: "127.0.0.1"              # MUST stay 127.0.0.1 — the gateway is the only ingress
+  port: <UNIQUE_LOOPBACK_PORT>   # e.g. 30001; must be unique across catalog entries
+
+sglang:
+  # Everything in this block is forwarded verbatim to sglang.launch_server.
+  # snake_case keys become --kebab-case flags. bool true → bare flag.
+  # bool false / null → omitted. lists → repeated --flag value pairs.
+  model_path: "<ABSOLUTE_PATH_TO_WEIGHTS>"   # e.g. /models/chat-vlm
+  served_model_name: "<MODEL_ID>"            # client-facing id; usually matches worker.name
+  dtype: "bfloat16"                          # bfloat16 | float16 | awq_marlin | ...
+  mem_fraction_static: 0.85                  # 0.0–1.0 of GPU VRAM sglang reserves on startup
+
+  # ── Chat / VLM models ──────────────────────────────────────────────
+  # Pick one of sglang's built-in template names (chatml, llama-3, mistral, …)
+  # or point at a Jinja file on disk. Remove this block for embedding models.
+  chat_template: "chatml"
+
+  # ── Embedding models ───────────────────────────────────────────────
+  # Uncomment the next line (and remove chat_template above) for an embedding model.
+  # is_embedding: true
+
+  # Any other sglang.launch_server flag can be added here, e.g.:
+  # context_length: 32768
+  # tensor_parallel_size: 2
+  # quantization: "awq"
+
+capabilities:
+  # Pure metadata — surfaced by GET /v1/models so clients can discover what
+  # each model supports. Does not affect how sglang runs.
+  chat: true                     # set false for embedding-only models
+  vision: false                  # set true for VLMs (image input)
+  embeddings: false              # set true if this is an embedding model
+  max_context_tokens: 32768      # advertised context window
+  max_image_pixels: 2000000      # only meaningful for VLMs; remove for text/embed models

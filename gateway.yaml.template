@@ -1,0 +1,41 @@
+# Gateway config template.
+#
+# Copy this to ./gateway.yaml (or /etc/verkos/gateway.yaml in production) and
+# replace every <PLACEHOLDER>. Anything not marked <…> already has a sensible
+# default and can be left alone for v1.
+#
+# Field-by-field reference: docs/INFERENCE_API_ARCHITECTURE.md §B.4.
+
+auth:
+  # Path to the bearer-key file produced by scripts/generate_api_key.py.
+  # In production, use an absolute path like /etc/verkos/keys.json (mode 0600).
+  keys_file: "<ABSOLUTE_PATH_TO_keys.json>"
+
+# Catalog of bootable models — one entry per id clients are allowed to request.
+# The gateway holds at most ONE of these live at a time and swaps between them
+# on demand. Inference for an id not in this list returns 404.
+models:
+  - id: "<CLIENT_FACING_MODEL_ID>"             # e.g. "chat-vlm" — value clients put in the OpenAI `model` field
+    config_ref: "workers/<MODEL_FILENAME>.yaml" # path is resolved relative to this gateway.yaml unless absolute
+
+  # Add more entries here; one per catalog model. Example:
+  # - id: "bge-embed"
+  #   config_ref: "workers/bge-embed.yaml"
+
+server:
+  host: "0.0.0.0"        # 0.0.0.0 = LAN-reachable; 127.0.0.1 = localhost-only
+  port: 8000
+  log_level: "info"      # debug | info | warning | error
+
+gpu:
+  poll_interval_s: 5.0   # how often NVML is sampled for the /metrics gauges
+
+manager:
+  # Max seconds to wait for sglang's /health to flip after spawn before the
+  # load is treated as failed (504 timeout).
+  load_timeout_s: 120.0
+  # How often the manager polls /health during a cold start.
+  health_poll_interval_s: 0.5
+  # Path to the Python interpreter that should host sglang. null → use the
+  # interpreter the gateway is running under (recommended).
+  spawn_python: null
